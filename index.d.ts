@@ -1,4 +1,4 @@
-declare module "qr-code" {
+declare module "node-qr-code" {
     /**
      * Encode a string or a buffer to a QR Code.
      * @param {Buffer!} data

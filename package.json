@@ -1,5 +1,5 @@
 {
-  "name": "qr-code",
+  "name": "node-qr-code",
   "version": "1.0.0",
   "description": "Encode QR Code by using N-API.",
   "main": "index.js",

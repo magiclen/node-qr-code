@@ -303,8 +303,8 @@ $(obj).$(TOOLSET)/%.o: $(obj)/%.s FORCE_DO_CMD
 
 ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
     $(findstring $(join ^,$(prefix)),\
-                 $(join ^,qr-code.target.mk)))),)
-  include qr-code.target.mk
+                 $(join ^,node-qr-code.target.mk)))),)
+  include node-qr-code.target.mk
 endif
 
 quiet_cmd_regen_makefile = ACTION Regenerating $@
