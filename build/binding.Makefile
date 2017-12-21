@@ -3,4 +3,4 @@
 export builddir_name ?= ./build/.
 .PHONY: all
 all:
-	$(MAKE) node-qr-code
+	$(MAKE) magic-qr-code
