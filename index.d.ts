@@ -1,4 +1,4 @@
-declare module "node-qr-code" {
+declare module "magic-qr-code" {
     /**
      * Encode a string or a buffer to a QR Code.
      * @param {Buffer!} data

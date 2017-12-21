@@ -1,7 +1,7 @@
 {
 	"targets": [
 		{
-			"target_name": "node-qr-code",
+			"target_name": "magic-qr-code",
 			"sources": [
 				"./src/qrcodegen.c",
 				"./src/qr-code.c"

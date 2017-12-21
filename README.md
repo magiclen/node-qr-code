@@ -12,13 +12,13 @@ NOTICE: N-API is a new experimental feature in Node.js 8.
 Run `npm i` or `npm install` to install.
 
 ```bash
-npm install node-qr-code
+npm install magic-qr-code
 ```
 
 If you want to save this module to package.json, please add `--save` option.
 
 ```bash
-npm install node-qr-code --save
+npm install magic-qr-code --save
 ```
 
 ## Initialization
@@ -26,7 +26,7 @@ npm install node-qr-code --save
 Import this module by using `require` function.
 
 ```javascript
-const QRCode = require('node-qr-code');
+const QRCode = require('magic-qr-code');
 ```
 
 ## Usage
