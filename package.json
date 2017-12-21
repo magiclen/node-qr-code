@@ -1,6 +1,6 @@
 {
   "name": "magic-qr-code",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Encode QR Code by using N-API.",
   "main": "index.js",
   "typings": "index.d.ts",
