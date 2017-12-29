@@ -22,6 +22,7 @@ CFLAGS_Debug := \
 	-Wextra \
 	-Wno-unused-parameter \
 	-m64 \
+	-std=c99 \
 	-g \
 	-O0
 
@@ -57,6 +58,7 @@ CFLAGS_Release := \
 	-Wextra \
 	-Wno-unused-parameter \
 	-m64 \
+	-std=c99 \
 	-O3 \
 	-fno-omit-frame-pointer
 

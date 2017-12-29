@@ -5,6 +5,9 @@
 			"sources": [
 				"./src/qrcodegen.c",
 				"./src/qr-code.c"
+			],
+			"cflags": [
+				"-std=c99"
 			]
 		}
 	]
