@@ -5,8 +5,6 @@ QR Code For Node.js
 
 Encode QR Code by using N-API. The QR code generating library is [QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library "QR Code generator library").
 
-NOTICE: N-API is a new experimental feature in Node.js 8.
-
 ## Installation
 
 Run `npm i` or `npm install` to install.
