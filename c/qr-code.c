@@ -60,10 +60,13 @@ napi_value encode(napi_env env, napi_callback_info info)
                 size_t stringDataLength;
                 napi_get_value_string_utf8(env, args[0], NULL, 0, &stringDataLength);
                 ++stringDataLength;
-                char stringData[stringDataLength];
+                char *stringData = malloc(sizeof(char) * stringDataLength);
                 napi_get_value_string_utf8(env, args[0], stringData, stringDataLength, &stringDataLength);
 
                 bool ok = qrcodegen_encodeText(stringData, tempBuffer, qr, ecc, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
+
+                free(stringData);
+                
                 if (!ok)
                 {
                         return createFalse(env);
