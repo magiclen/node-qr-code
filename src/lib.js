@@ -1,4 +1,4 @@
-const QRCode = require('bindings')('magic-qr-code');
+const QRCode = require("bindings")("magic-qr-code");
 
 QRCode.ECC_L = 0;
 QRCode.ECC_M = 1;
