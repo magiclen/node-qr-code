@@ -1,12 +1,14 @@
 {
   "name": "magic-qr-code",
-  "version": "1.0.8",
+  "version": "2.0.0",
   "description": "Encode QR Code by using N-API.",
-  "main": "src/lib.js",
-  "typings": "index.d.ts",
+  "main": "lib/lib.js",
+  "typings": "lib/lib.d.ts",
   "scripts": {
-    "test": "mocha tests/**/*.test.js",
-    "build": "node-gyp rebuild",
+    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "dev": "tsc -w",
+    "build": "cargo-cp-artifact -nc index.node -- cargo build --release --message-format=json-render-diagnostics && tsc",
+    "install": "npm run build",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test"
   },
@@ -18,10 +20,13 @@
     "url": "git+https://github.com/magiclen/node-qr-code.git"
   },
   "keywords": [
-    "nodejs",
-    "QR Code",
+    "node.js",
     "QR",
-    "QR-Code-generator"
+    "Code",
+    "QR",
+    "QR",
+    "Code",
+    "Generator"
   ],
   "author": "Magic Len <len@magiclen.org> (https://magiclen.org)",
   "license": "MIT",
@@ -31,11 +36,17 @@
   "homepage": "https://magiclen.org/node-qrcode/",
   "dependencies": {
     "@types/node": "^15.6.1",
-    "bindings": "^1.3.0"
+    "cargo-cp-artifact": "^0.1"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
+    "@types/chai": "^4.2.18",
+    "@types/mocha": "^8.2.2",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "chai": "^4.3.4",
     "eslint": "^7.27.0",
-    "mocha": "^8.4.0"
+    "mocha": "^8.4.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2"
   }
 }

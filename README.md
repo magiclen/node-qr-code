@@ -1,9 +1,11 @@
-QR Code For Node.js
+magic-qr-code
 =================================
 
 [![CI](https://github.com/magiclen/node-qr-code/actions/workflows/ci.yml/badge.svg)](https://github.com/magiclen/node-qr-code/actions/workflows/ci.yml)
 
-Encode QR Code by using N-API. The QR code generating library is [QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library "QR Code generator library").
+Encode QR Code by using N-API. The QR code generating library is [QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library "QR Code generator library")
+
+You need to set up the Rust development environment: [rustup](https://rustup.rs/)
 
 ## Usage
 
@@ -40,10 +42,10 @@ const result = QRCode.encode('https://magiclen.org'.toUpperCase());
 */
 ```
 
-Encoding QR code, you can also set the error correction level by passing `ECC_L`, `ECC_M`, `ECC_Q`, `ECC_H` as the second argument.
+Encoding QR code, you can also set the error correction level by passing a `ErrorCollection` number to the second argument.
 
 ```javascript
-const result = QRCode.encode('https://magiclen.org'.toUpperCase(), QRCode.ECC_H);
+const result = QRCode.encode('https://magiclen.org'.toUpperCase(), QRCode.ErrorCollection.High);
 ```
 
 ## License

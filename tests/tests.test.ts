@@ -1,7 +1,7 @@
-const expect = require("chai").expect;
-const { describe, it } = require("mocha");
+import { describe, it } from "mocha";
+import { expect } from "chai";
 
-const QRCode = require("..");
+import * as QRCode from "..";
 
 describe("Encode QR Code", function () {
     it("should encode a V1 QR code.", function () {

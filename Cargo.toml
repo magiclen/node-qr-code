@@ -1,0 +1,31 @@
+[package]
+name = "magic-qr-code"
+version = "2.0.0"
+authors = ["Magic Len <len@magiclen.org>"]
+edition = "2018"
+repository = "https://github.com/magiclen/node-int32"
+homepage = "https://magiclen.org/node-js-int32/"
+keywords = ["node.js", "int32", "overflow", "underflow"]
+categories = []
+description = "Encode QR Code by using N-API."
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[dependencies]
+qrcode-generator = "4"
+
+[dependencies.qrcode-segments-optimizer]
+git = "https://github.com/magiclen/qrcode-segments-optimizer"
+branch = "master"
+
+[dependencies.neon]
+version = "0.8"
+default-features = false
+features = ["napi-6"]
