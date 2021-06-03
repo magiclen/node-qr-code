@@ -1,8 +1,8 @@
 /// <reference types="node" />
-export declare enum ErrorCollection {
+export declare enum ErrorCorrection {
     Low = 0,
     Medium = 1,
     Quartile = 2,
     High = 3
 }
-export declare const encode: (data: Buffer | string, errorCollection?: ErrorCollection) => Buffer[];
+export declare const encode: (data: Buffer | string, errorCorrection?: ErrorCorrection) => Buffer[];
