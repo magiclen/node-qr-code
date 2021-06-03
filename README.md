@@ -42,10 +42,10 @@ const result = QRCode.encode('https://magiclen.org'.toUpperCase());
 */
 ```
 
-Encoding QR code, you can also set the error correction level by passing a `ErrorCollection` number to the second argument.
+Encoding QR code, you can also set the error correction level by passing a `ErrorCorrection` number to the second argument.
 
 ```javascript
-const result = QRCode.encode('https://magiclen.org'.toUpperCase(), QRCode.ErrorCollection.High);
+const result = QRCode.encode('https://magiclen.org'.toUpperCase(), QRCode.ErrorCorrection.High);
 ```
 
 ## License
