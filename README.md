@@ -11,7 +11,7 @@ You need to set up the Rust development environment: [rustup](https://rustup.rs/
 
 ### Encode QR Code
 
-You can use `encode` function to encode a string or a buffer into QR Code data which is an array with buffers.
+You can use `encode` function to encode a string or a buffer into QR Code data which is an array with buffers (`Buffer[]`).
 
 ```javascript
 const result = QRCode.encode('https://magiclen.org'.toUpperCase());
