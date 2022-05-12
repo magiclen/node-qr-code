@@ -1,10 +1,7 @@
-extern crate neon;
-extern crate qrcode_generator;
-extern crate qrcode_segments_optimizer;
-
 use std::str::from_utf8;
 
 use neon::prelude::*;
+use neon::types::buffer::TypedArray;
 
 const DEFAULT_ECC: qrcode_generator::QrCodeEcc = qrcode_generator::QrCodeEcc::Low;
 
@@ -12,24 +9,22 @@ fn qr_code_to_js_buffer<'a>(
     cx: &mut FunctionContext<'a>,
     qr_code: Vec<Vec<bool>>,
 ) -> JsResult<'a, JsArray> {
-    let size = qr_code.len() as u32;
+    let size = qr_code.len();
 
-    let array = JsArray::new(cx, size);
+    let array = JsArray::new(cx, size as u32);
 
-    for i in 0..size {
+    for (i, qr_code_row) in qr_code.into_iter().enumerate() {
         let mut buffer = JsBuffer::new(cx, size)?;
 
-        cx.borrow_mut(&mut buffer, |buffer| {
-            let data: &mut [u8] = buffer.as_mut_slice();
+        let data = buffer.as_mut_slice(cx);
 
-            for (i, v) in qr_code[i as usize].iter().copied().enumerate() {
-                if v {
-                    data[i] = 1;
-                }
+        for (i, v) in qr_code_row.iter().copied().enumerate() {
+            if v {
+                data[i] = 1;
             }
-        });
+        }
 
-        array.set(cx, i, buffer)?;
+        array.set(cx, i as u32, buffer)?;
     }
 
     Ok(array)
@@ -55,8 +50,8 @@ fn encode(mut cx: FunctionContext) -> JsResult<JsArray> {
             };
 
             if let Ok(arg) = arg1.downcast::<JsBuffer, _>(&mut cx) {
-                let qr_code = cx.borrow(&arg, |buffer| {
-                    let data = buffer.as_slice();
+                let qr_code = {
+                    let data = arg.as_slice(&cx);
 
                     match from_utf8(data) {
                         Ok(s) => {
@@ -69,7 +64,7 @@ fn encode(mut cx: FunctionContext) -> JsResult<JsArray> {
                         }
                         Err(_) => qrcode_generator::to_matrix(data, ecc),
                     }
-                });
+                };
 
                 match qr_code {
                     Ok(qr_code) => qr_code_to_js_buffer(&mut cx, qr_code),

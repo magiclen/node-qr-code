@@ -1,8 +1,8 @@
 [package]
 name = "magic-qr-code"
-version = "2.0.8"
+version = "2.0.9"
 authors = ["Magic Len <len@magiclen.org>"]
-edition = "2018"
+edition = "2021"
 repository = "https://github.com/magiclen/node-qr-code"
 homepage = "https://magiclen.org/node-qrcode/"
 keywords = ["node.js", "QR", "generator"]
@@ -26,6 +26,6 @@ git = "https://github.com/magiclen/qrcode-segments-optimizer"
 branch = "master"
 
 [dependencies.neon]
-version = "0.9"
+version = "0.10"
 default-features = false
 features = ["napi-6"]
