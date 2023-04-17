@@ -1,98 +1,82 @@
 use std::str::from_utf8;
 
-use neon::prelude::*;
-use neon::types::buffer::TypedArray;
+use napi::bindgen_prelude::*;
+use napi_derive::napi;
+use qrcode_generator::QrCodeEcc;
 
-const DEFAULT_ECC: qrcode_generator::QrCodeEcc = qrcode_generator::QrCodeEcc::Low;
+const DEFAULT_ECC: QrCodeEcc = QrCodeEcc::Low;
 
-fn qr_code_to_js_buffer<'a>(
-    cx: &mut FunctionContext<'a>,
-    qr_code: Vec<Vec<bool>>,
-) -> JsResult<'a, JsArray> {
+#[allow(clippy::uninit_vec)]
+fn qr_code_to_js_buffer(qr_code: Vec<Vec<bool>>) -> Result<Vec<Buffer>> {
     let size = qr_code.len();
 
-    let array = JsArray::new(cx, size as u32);
+    let mut array = Vec::with_capacity(size);
+
+    let remaining = array.spare_capacity_mut();
 
     for (i, qr_code_row) in qr_code.into_iter().enumerate() {
-        let mut buffer = JsBuffer::new(cx, size)?;
-
-        let data = buffer.as_mut_slice(cx);
+        let mut buffer = vec![0u8; size];
 
         for (i, v) in qr_code_row.iter().copied().enumerate() {
             if v {
-                data[i] = 1;
+                buffer[i] = 1;
             }
         }
 
-        array.set(cx, i as u32, buffer)?;
+        remaining[i].write(Buffer::from(buffer));
+    }
+
+    unsafe {
+        array.set_len(size);
     }
 
     Ok(array)
 }
 
-fn encode(mut cx: FunctionContext) -> JsResult<JsArray> {
-    match cx.argument_opt(0) {
-        Some(arg1) => {
-            let ecc = match cx.argument_opt(1) {
-                Some(arg) => {
-                    if let Ok(arg) = arg.downcast::<JsNumber, _>(&mut cx) {
-                        match arg.value(&mut cx) as i64 {
-                            1 => qrcode_generator::QrCodeEcc::Medium,
-                            2 => qrcode_generator::QrCodeEcc::Quartile,
-                            3 => qrcode_generator::QrCodeEcc::High,
-                            _ => DEFAULT_ECC,
-                        }
-                    } else {
-                        DEFAULT_ECC
-                    }
-                }
-                None => DEFAULT_ECC,
-            };
-
-            if let Ok(arg) = arg1.downcast::<JsBuffer, _>(&mut cx) {
-                let qr_code = {
-                    let data = arg.as_slice(&cx);
-
-                    match from_utf8(data) {
-                        Ok(s) => {
-                            match qrcode_segments_optimizer::make_segments_from_str(s, ecc) {
-                                Ok(segments) => {
-                                    qrcode_generator::to_matrix_from_segments(&segments, ecc)
-                                }
-                                Err(err) => Err(err),
-                            }
-                        }
-                        Err(_) => qrcode_generator::to_matrix(data, ecc),
-                    }
-                };
-
-                match qr_code {
-                    Ok(qr_code) => qr_code_to_js_buffer(&mut cx, qr_code),
-                    Err(err) => cx.throw_error(err.to_string()),
-                }
-            } else {
-                let arg = arg1.downcast_or_throw::<JsString, _>(&mut cx)?;
-
-                let arg = arg.value(&mut cx);
-
-                match qrcode_segments_optimizer::make_segments_from_str(arg, ecc) {
-                    Ok(segments) => {
-                        match qrcode_generator::to_matrix_from_segments(&segments, ecc) {
-                            Ok(qr_code) => qr_code_to_js_buffer(&mut cx, qr_code),
-                            Err(err) => cx.throw_error(err.to_string()),
-                        }
-                    }
-                    Err(err) => cx.throw_error(err.to_string()),
-                }
-            }
-        }
-        None => cx.throw_error("need an argument"),
+#[inline]
+fn get_ecc(ecc: Option<u8>) -> QrCodeEcc {
+    match ecc {
+        Some(n) => match n {
+            1 => QrCodeEcc::Medium,
+            2 => QrCodeEcc::Quartile,
+            3 => QrCodeEcc::High,
+            _ => DEFAULT_ECC,
+        },
+        None => DEFAULT_ECC,
     }
 }
 
-#[neon::main]
-fn main(mut cx: ModuleContext) -> NeonResult<()> {
-    cx.export_function("encode", encode)?;
+#[napi(js_name = "encodeBuffer")]
+pub fn encode_buffer(buffer: Buffer, ecc: Option<u8>) -> Result<Vec<Buffer>> {
+    let ecc = get_ecc(ecc);
 
-    Ok(())
+    let qr_code = {
+        let data = buffer.as_ref();
+
+        match from_utf8(data) {
+            Ok(s) => {
+                let segments = qrcode_segments_optimizer::make_segments_from_str(s, ecc)
+                    .map_err(|err| Error::from_reason(err.to_string()))?;
+
+                qrcode_generator::to_matrix_from_segments(&segments, ecc)
+                    .map_err(|err| Error::from_reason(err.to_string()))?
+            },
+            Err(_) => qrcode_generator::to_matrix(data, ecc).map_err(|err| Error::from_reason(err.to_string()))?,
+        }
+    };
+
+    qr_code_to_js_buffer(qr_code)
+}
+
+#[napi(js_name = "encodeString")]
+pub fn encode_string(s: String, ecc: Option<u8>) -> Result<Vec<Buffer>> {
+    let ecc = get_ecc(ecc);
+
+    let segments =
+        qrcode_segments_optimizer::make_segments_from_str(s, ecc).map_err(|err| Error::from_reason(err.to_string()))?;
+
+    let qr_code =
+        qrcode_generator::to_matrix_from_segments(&segments, ecc).map_err(|err| Error::from_reason(err.to_string()))?;
+
+    qr_code_to_js_buffer(qr_code)
 }
