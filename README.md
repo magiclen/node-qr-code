@@ -11,10 +11,12 @@ You need to set up the Rust development environment: [rustup](https://rustup.rs/
 
 ### Encode QR Code
 
-You can use `encode` function to encode a string or a buffer into QR Code data which is an array with buffers (`Buffer[]`).
+You can use the `encode_string` function to encode a string or use the `encode_buffer` function to encode a buffer into QR Code data which is an array of buffers (`Buffer[]`).
 
-```javascript
-const result = QRCode.encode('https://magiclen.org'.toUpperCase());
+```typescript
+import { encode_string } from "magic-qr-code";
+
+const result = encode_string('https://magiclen.org'.toUpperCase());
 /*
  [
   <Buffer 01 01 01 01 01 01 01 00 01 01 00 00 01 00 01 01 01 01 01 01 01>,
@@ -44,8 +46,10 @@ const result = QRCode.encode('https://magiclen.org'.toUpperCase());
 
 Encoding QR code, you can also set the error correction level by passing a `ErrorCorrection` number to the second argument.
 
-```javascript
-const result = QRCode.encode('https://magiclen.org'.toUpperCase(), QRCode.ErrorCorrection.High);
+```typescript
+import { encode_string, ErrorCorrection } from "magic-qr-code";
+
+const result = encode_string('https://magiclen.org'.toUpperCase(), ErrorCorrection.High);
 ```
 
 ## License
