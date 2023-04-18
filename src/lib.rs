@@ -61,7 +61,8 @@ pub fn encode_buffer(buffer: Buffer, ecc: Option<u8>) -> Result<Vec<Buffer>> {
                 qrcode_generator::to_matrix_from_segments(&segments, ecc)
                     .map_err(|err| Error::from_reason(err.to_string()))?
             },
-            Err(_) => qrcode_generator::to_matrix(data, ecc).map_err(|err| Error::from_reason(err.to_string()))?,
+            Err(_) => qrcode_generator::to_matrix(data, ecc)
+                .map_err(|err| Error::from_reason(err.to_string()))?,
         }
     };
 
@@ -72,11 +73,11 @@ pub fn encode_buffer(buffer: Buffer, ecc: Option<u8>) -> Result<Vec<Buffer>> {
 pub fn encode_string(s: String, ecc: Option<u8>) -> Result<Vec<Buffer>> {
     let ecc = get_ecc(ecc);
 
-    let segments =
-        qrcode_segments_optimizer::make_segments_from_str(s, ecc).map_err(|err| Error::from_reason(err.to_string()))?;
+    let segments = qrcode_segments_optimizer::make_segments_from_str(s, ecc)
+        .map_err(|err| Error::from_reason(err.to_string()))?;
 
-    let qr_code =
-        qrcode_generator::to_matrix_from_segments(&segments, ecc).map_err(|err| Error::from_reason(err.to_string()))?;
+    let qr_code = qrcode_generator::to_matrix_from_segments(&segments, ecc)
+        .map_err(|err| Error::from_reason(err.to_string()))?;
 
     qr_code_to_js_buffer(qr_code)
 }
