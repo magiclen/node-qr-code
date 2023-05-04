@@ -1,4 +1,4 @@
-import { encodeBuffer, encodeString } from "../src/lib";
+import { encodeBuffer, encodeString } from "../src/lib.js";
 
 describe("Encode QR Code", function () {
     it("should encode a V1 QR code.", function () {
