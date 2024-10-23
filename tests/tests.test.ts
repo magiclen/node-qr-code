@@ -1,7 +1,7 @@
 import { encodeBuffer, encodeString } from "../src/lib.js";
 
-describe("Encode QR Code", function () {
-    it("should encode a V1 QR code.", function () {
+describe("Encode QR Code", () => {
+    it("should encode a V1 QR code.", () => {
         const data = "https://magiclen.org".toUpperCase();
 
         const result1 = encodeString(data);
@@ -11,7 +11,7 @@ describe("Encode QR Code", function () {
         expect(result2.length).toBe(21);
     });
 
-    it("should encode a V2 QR code.", function () {
+    it("should encode a V2 QR code.", () => {
         const data = "https://magiclen.org";
 
         const result1 = encodeString(data);
