@@ -78,6 +78,13 @@ describe("Encode Micro QR Code", () => {
         assert.equal(symbol.rows.length, 13);
     });
 
+    it("encodes bytes into a Micro QR code", () => {
+        const symbol = encodeMicroQr(Buffer.from("12345", "utf8"));
+
+        assert.equal(symbol.version, "M2");
+        assert.equal(symbol.width, 13);
+    });
+
     it("uses version M1 for the detection-only level", () => {
         const symbol = encodeMicroQr("12345", MicroErrorCorrection.DetectionOnly);
 
@@ -95,6 +102,12 @@ describe("Encode rMQR", () => {
         assert.equal(symbol.height, 9);
         assert.equal(symbol.rows.length, 9);
         assert.ok(symbol.rows.every((row) => row.length === 59));
+    });
+
+    it("encodes bytes into a rectangular symbol", () => {
+        const symbol = encodeRmqr(Buffer.from("https://magiclen.org", "utf8"));
+
+        assert.equal(symbol.version, "R9x59");
     });
 });
 
@@ -114,5 +127,11 @@ describe("Render SVG", () => {
 
         assert.match(svg, /^<svg width="860" height="140" /);
         assert.doesNotMatch(svg, /<desc>/);
+    });
+
+    it("renders an SVG image without the quiet zone", () => {
+        const svg = encodeQr("https://magiclen.org").toSvg(25, { quietZone: 0 });
+
+        assert.match(svg, /<path d="M0 0h7v1H0V0/);
     });
 });

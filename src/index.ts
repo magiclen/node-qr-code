@@ -52,7 +52,7 @@ export interface SvgOptions {
      *
      * It defaults to the name and version of the Rust library that draws the image.
      *
-     * The text must only contain characters that XML 1.0 allows.
+     * Characters that XML 1.0 does not allow are replaced with U+FFFD.
      */
     description?: string;
     /**
@@ -91,6 +91,8 @@ export interface QrSymbol {
      * One buffer for each row, where `1` is a dark module and `0` is a light module.
      *
      * The rows are views of one shared buffer.
+     *
+     * The same array is returned every time, so it is cheap to read in a loop.
      */
     readonly rows: Buffer[];
 
@@ -138,7 +140,7 @@ class NativeQrSymbol implements QrSymbol {
     readonly errorCorrection: ErrorCorrection | MicroErrorCorrection | RmqrErrorCorrection;
 
     readonly #native: NativeSymbol;
-    #modules: Buffer | undefined;
+    #rows: Buffer[] | undefined;
 
     constructor(native: NativeSymbol) {
         this.#native = native;
@@ -150,15 +152,17 @@ class NativeQrSymbol implements QrSymbol {
     }
 
     get rows(): Buffer[] {
-        // The modules are copied from Rust only once, and every row is a view of them.
-        this.#modules ??= this.#native.modules();
+        if (this.#rows === undefined) {
+            // The modules are copied from Rust only once, and every row is a view of them.
+            const modules = this.#native.modules();
+            const width = this.width;
 
-        const modules = this.#modules;
-        const width = this.width;
+            this.#rows = Array.from({ length: this.height }, (_, y) =>
+                modules.subarray(y * width, (y + 1) * width),
+            );
+        }
 
-        return Array.from({ length: this.height }, (_, y) =>
-            modules.subarray(y * width, (y + 1) * width),
-        );
+        return this.#rows;
     }
 
     toSvg(size: number, options?: SvgOptions): string;
@@ -167,7 +171,7 @@ class NativeQrSymbol implements QrSymbol {
         const [height, svgOptions] =
             typeof heightOrOptions === "number"
                 ? [heightOrOptions, options ?? {}]
-                : [width, heightOrOptions ?? {}];
+                : [width, heightOrOptions ?? options ?? {}];
         const { description, quietZone, xmlDeclaration = true } = svgOptions;
 
         assertUint32(width, "width");
@@ -203,7 +207,9 @@ export const encodeQr = (
 /**
  * Encodes data into a Micro QR Code, which is smaller than QR Code and suits short data.
  *
- * A string must only use ISO-8859-1 characters, and a `Uint8Array` is stored as the exact bytes.
+ * A string must only use ISO-8859-1 characters.
+ *
+ * A `Uint8Array` (or a `Buffer`) is stored as the exact bytes.
  */
 export const encodeMicroQr = (
     data: string | Uint8Array,

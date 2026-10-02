@@ -118,12 +118,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "html-escape"
-version = "0.2.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9356095b4b41197bba32173600e1582792cda618f65d12f68e2e77d273413c5"
-
-[[package]]
 name = "libc"
 version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -236,12 +230,9 @@ dependencies = [
 
 [[package]]
 name = "qrcode-generator"
-version = "6.1.1"
+version = "6.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca2bd6a0680cb47dc20f639a5352414a30abdbc78990bb346488056912c48ecb"
-dependencies = [
- "html-escape",
-]
+checksum = "892685c7a313d378de4d0897f7c5be347f296933913219201b8320aca5a5fee1"
 
 [[package]]
 name = "quote"

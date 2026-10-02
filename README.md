@@ -134,7 +134,7 @@ const rmqrSvg = encodeRmqr("https://magiclen.org").toSvg(630, 130);
 
 The last argument is an optional object.
 
-- `description`: the text of the `<desc>` element. An empty string leaves the element out.
+- `description`: the text of the `<desc>` element. An empty string leaves the element out. Characters that XML 1.0 does not allow are replaced with U+FFFD.
 - `quietZone`: the minimum quiet zone in modules. It defaults to 4 for QR Code and 2 for Micro QR Code and rMQR.
 - `xmlDeclaration`: whether the SVG starts with an XML declaration. It defaults to `true`. Set it to `false` when the SVG is put directly into an HTML page.
 
