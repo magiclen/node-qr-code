@@ -1,83 +1,60 @@
-use std::str::from_utf8;
-
-use napi::bindgen_prelude::*;
+use napi::{
+    Error, Result, Status,
+    bindgen_prelude::{Buffer, Uint8ArraySlice},
+};
 use napi_derive::napi;
-use qrcode_generator::QrCodeEcc;
+use qrcode_generator::{EncodeError, Symbol, qr};
 
-const DEFAULT_ECC: QrCodeEcc = QrCodeEcc::Low;
+/// An encoded symbol whose modules are stored row by row in one buffer.
+#[napi(object)]
+pub struct NativeSymbol {
+    /// The number of modules per side.
+    pub size:    u32,
+    /// The modules in row-major order, where `1` is dark and `0` is light.
+    pub modules: Buffer,
+}
 
-#[allow(clippy::uninit_vec)]
-fn qr_code_to_js_buffer(qr_code: Vec<Vec<bool>>) -> Result<Vec<Buffer>> {
-    let size = qr_code.len();
+/// Encodes text into a QR Code with automatically optimized segments.
+#[napi]
+pub fn encode_text(text: String, error_correction: u32) -> Result<NativeSymbol> {
+    let symbol = qr::Encoder::new(to_error_correction(error_correction)?)
+        .encode_text(text)
+        .map_err(into_napi_error)?;
 
-    let mut array = Vec::with_capacity(size);
+    Ok(to_native_symbol(&symbol))
+}
 
-    let remaining = array.spare_capacity_mut();
+/// Encodes bytes into a QR Code without changing them.
+#[napi]
+pub fn encode_bytes(data: Uint8ArraySlice<'_>, error_correction: u32) -> Result<NativeSymbol> {
+    let symbol = qr::Encoder::new(to_error_correction(error_correction)?)
+        .encode_bytes(data.as_ref())
+        .map_err(into_napi_error)?;
 
-    for (i, qr_code_row) in qr_code.into_iter().enumerate() {
-        let mut buffer = vec![0u8; size];
-
-        for (i, v) in qr_code_row.iter().copied().enumerate() {
-            if v {
-                buffer[i] = 1;
-            }
-        }
-
-        remaining[i].write(Buffer::from(buffer));
-    }
-
-    unsafe {
-        array.set_len(size);
-    }
-
-    Ok(array)
+    Ok(to_native_symbol(&symbol))
 }
 
 #[inline]
-fn get_ecc(ecc: Option<u8>) -> QrCodeEcc {
-    match ecc {
-        Some(n) => match n {
-            1 => QrCodeEcc::Medium,
-            2 => QrCodeEcc::Quartile,
-            3 => QrCodeEcc::High,
-            _ => DEFAULT_ECC,
-        },
-        None => DEFAULT_ECC,
+fn to_error_correction(error_correction: u32) -> Result<qr::ErrorCorrection> {
+    match error_correction {
+        0 => Ok(qr::ErrorCorrection::Low),
+        1 => Ok(qr::ErrorCorrection::Medium),
+        2 => Ok(qr::ErrorCorrection::Quartile),
+        3 => Ok(qr::ErrorCorrection::High),
+        _ => Err(Error::new(Status::InvalidArg, "The error correction level must be 0, 1, 2 or 3")),
     }
 }
 
-#[napi(js_name = "encodeBuffer")]
-pub fn encode_buffer(buffer: Buffer, ecc: Option<u8>) -> Result<Vec<Buffer>> {
-    let ecc = get_ecc(ecc);
+#[inline]
+fn to_native_symbol(symbol: &Symbol) -> NativeSymbol {
+    let modules: Vec<u8> = symbol.modules().iter().map(|&module| u8::from(module)).collect();
 
-    let qr_code = {
-        let data = buffer.as_ref();
-
-        match from_utf8(data) {
-            Ok(s) => {
-                let segments = qrcode_segments_optimizer::make_segments_from_str(s, ecc)
-                    .map_err(|err| Error::from_reason(err.to_string()))?;
-
-                qrcode_generator::to_matrix_from_segments(&segments, ecc)
-                    .map_err(|err| Error::from_reason(err.to_string()))?
-            },
-            Err(_) => qrcode_generator::to_matrix(data, ecc)
-                .map_err(|err| Error::from_reason(err.to_string()))?,
-        }
-    };
-
-    qr_code_to_js_buffer(qr_code)
+    NativeSymbol {
+        size: symbol.size() as u32, modules: modules.into()
+    }
 }
 
-#[napi(js_name = "encodeString")]
-pub fn encode_string(s: String, ecc: Option<u8>) -> Result<Vec<Buffer>> {
-    let ecc = get_ecc(ecc);
-
-    let segments = qrcode_segments_optimizer::make_segments_from_str(s, ecc)
-        .map_err(|err| Error::from_reason(err.to_string()))?;
-
-    let qr_code = qrcode_generator::to_matrix_from_segments(&segments, ecc)
-        .map_err(|err| Error::from_reason(err.to_string()))?;
-
-    qr_code_to_js_buffer(qr_code)
+#[inline]
+fn into_napi_error(error: EncodeError) -> Error {
+    Error::new(Status::InvalidArg, format!("failed to encode the data: {error}"))
 }
