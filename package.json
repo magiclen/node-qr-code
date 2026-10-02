@@ -1,6 +1,6 @@
 {
     "name": "magic-qr-code",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "Encode QR Code, Micro QR Code and rMQR symbols, and render them as SVG images, by using N-API.",
     "keywords": [
         "Micro QR Code",
