@@ -22,7 +22,11 @@ codegen-units = 1
 [dependencies]
 napi = "3.14.0"
 napi-derive = "3.6.10"
-qrcode-generator = { version = "6.1.1", default-features = false, features = ["qr"] }
+
+[dependencies.qrcode-generator]
+version = "6.1.1"
+default-features = false
+features = ["qr", "micro-qr", "rmqr"]
 
 [build-dependencies]
 napi-build = "2.6.0"

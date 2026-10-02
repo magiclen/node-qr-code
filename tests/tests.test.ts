@@ -2,7 +2,15 @@ import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import { describe, it } from "node:test";
 
-import { ErrorCorrection, encodeBuffer, encodeString } from "../src/index.ts";
+import {
+    ErrorCorrection,
+    MicroErrorCorrection,
+    encodeBuffer,
+    encodeMicroQr,
+    encodeQr,
+    encodeRmqr,
+    encodeString,
+} from "../src/index.ts";
 
 describe("Encode QR Code", () => {
     it("encodes a V1 QR code", () => {
@@ -47,5 +55,64 @@ describe("Encode QR Code", () => {
         const errorCorrection = 1.5 as unknown as ErrorCorrection;
 
         assert.throws(() => encodeString("magiclen", errorCorrection), RangeError);
+    });
+});
+
+describe("Symbol", () => {
+    it("exposes the size, the version and the rows of a QR code", () => {
+        const symbol = encodeQr("https://magiclen.org");
+
+        assert.equal(symbol.width, 25);
+        assert.equal(symbol.height, 25);
+        assert.equal(symbol.version, 2);
+        assert.deepEqual(symbol.rows, encodeString("https://magiclen.org"));
+    });
+});
+
+describe("Encode Micro QR Code", () => {
+    it("encodes short data into a Micro QR code", () => {
+        const symbol = encodeMicroQr("12345");
+
+        assert.equal(symbol.version, "M2");
+        assert.equal(symbol.width, 13);
+        assert.equal(symbol.rows.length, 13);
+    });
+
+    it("uses version M1 for the detection-only level", () => {
+        const symbol = encodeMicroQr("12345", MicroErrorCorrection.DetectionOnly);
+
+        assert.equal(symbol.version, "M1");
+        assert.equal(symbol.errorCorrection, MicroErrorCorrection.DetectionOnly);
+    });
+});
+
+describe("Encode rMQR", () => {
+    it("encodes data into a rectangular symbol", () => {
+        const symbol = encodeRmqr("https://magiclen.org");
+
+        assert.equal(symbol.version, "R9x59");
+        assert.equal(symbol.width, 59);
+        assert.equal(symbol.height, 9);
+        assert.equal(symbol.rows.length, 9);
+        assert.ok(symbol.rows.every((row) => row.length === 59));
+    });
+});
+
+describe("Render SVG", () => {
+    it("renders a square SVG image with an XML declaration", () => {
+        const svg = encodeQr("https://magiclen.org").toSvg(512);
+
+        assert.match(svg, /^<\?xml /);
+        assert.match(svg, /<svg width="512" height="512" /);
+    });
+
+    it("renders an SVG image with the given dimensions and options", () => {
+        const svg = encodeRmqr("https://magiclen.org").toSvg(860, 140, {
+            description: "",
+            xmlDeclaration: false,
+        });
+
+        assert.match(svg, /^<svg width="860" height="140" /);
+        assert.doesNotMatch(svg, /<desc>/);
     });
 });
